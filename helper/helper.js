@@ -14,6 +14,15 @@ const getSlugInfo = async(comment_id) => {
     }
 }
 
+const lastIndexOf = array => {
+    for(let i = array.length - 1; i >= 0; i--){
+        if(array[i].parent_id === null)
+            return i;
+    }
+    return -1;
+};
+
 module.exports = {
-    getSlugInfo
+    getSlugInfo,
+    lastIndexOf
 }

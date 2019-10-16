@@ -17,7 +17,7 @@ router.post(`/comment`, middleware.authentication(), async (req, res) => {
             })
         }
         let slug = randomstring.generate(4);
-        let full_slug = `${moment().format(`YYYYMMDDHHMMSS`)}:${slug}`;
+        let full_slug = `${moment().format(`YYYYMMDDHHmmss`)}:${slug}`;
         if(comment.parent_id){
             const slug_info = await helper.getSlugInfo(comment.parent_id);
             if(!slug_info) return res.json({
@@ -121,13 +121,16 @@ router.get(`/comment`, middleware.authentication(), async (req, res) => {
         }
         params.offset = params.offset ? params.offset : 0;
         params.limit = params.limit ? params.limit : 1844674407370955161;
-        const query = [`SELECT c.*, u.username FROM comments c INNER JOIN users u ON c.user_id = u.id WHERE post_id=${params.post_id} ORDER BY full_slug LIMIT ${params.limit} OFFSET ${params.offset}`];
+        const query = [`SELECT c.*, u.username FROM comments c INNER JOIN users u ON c.user_id = u.id WHERE post_id=${params.post_id} ORDER BY full_slug ASC LIMIT ${params.limit} OFFSET ${params.offset}`];
         const result = await mysql.executeQuery(query);
-        let comments = [];
+        let comments = [], finalData = [];
         if (result && result.length && result[0].length) comments = result[0];
+        while(comments.length){
+            finalData = [...finalData,...comments.splice(helper.lastIndexOf(comments))]
+        }
         return res.json({
             status: true,
-            comments: comments
+            comments: finalData
         })
     } catch (err) {
         console.log(err)
